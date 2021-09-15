@@ -1,19 +1,29 @@
-const express = require('express');
-const path = require('path')
+const express = require('express')
 const app = express();
 
-//setup static middleware
-//app.use is for building middleware
-//static asset means file that server doesnt have to change 
-//default convention to use the word public 
-app.use(express.static('./public'))
+const { products } = require('./data')
+
 
 app.get('/', (req, res) => {
-    res.sendFile(path.resolve(__dirname, './navbar-app/index.html'))
+    res.send('<h1>Home Page</h1><a href="/api/products">Products</a>')
 })
-app.all('*', (req, res) => {
-    res.status(404).send('Resource not found')
+app.get('/api/products', (req, res) => {
+        //being selective of what we are sending
+        const newProducts = products.map((product) => {
+            const { id, name, image } = product
+            return { id, name, image }
+        })
+
+        res.json(newProducts)
+    })
+    // : means Route parameter 
+app.get('/api/products/:productID', (req, res) => {
+    const { productID } = req.params
+    const singleProduct = products.find((product) => product.id === Number(productID))
+    res.json(singleProduct)
 })
+
+
 app.listen(5000, () => {
-    console.log('server listening')
+    console.log('Server is listening....')
 })
